@@ -18,15 +18,15 @@ const generate_a_nice_response = () => {
 };
 
 const hello = async (event, context) => {
-  const tracer = openTelemetryAPI.trace.getTracer();
+  const tracer = openTelemetryAPI.trace.getTracer("helloTracer", "1.0");
 
   console.log("tracer", tracer);
 
   /* -- Tracer instance Log --   
     tracer ProxyTracer {
-     _provider: ProxyTracerProvider {},
-     name: undefined,
-     version: undefined
+    _provider: ProxyTracerProvider {},
+      name: 'helloTracer',
+      version: '1.0'
   }*/
 
   const niceResponseSpan = tracer.startSpan("generating nice response");
