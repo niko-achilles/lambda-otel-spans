@@ -4,7 +4,10 @@ const openTelemetryAPI = require("@opentelemetry/api");
 
 let niceResponse;
 
-const generate_a_nice_response = () => {
+const generate_a_nice_response = async () => {
+  // wait here before getting the span
+  await forSomeMilliSeconds(2000);
+
   console.log(
     "nice response Span? ",
     openTelemetryAPI.trace.getSpan(openTelemetryAPI.context.active())
@@ -15,6 +18,19 @@ const generate_a_nice_response = () => {
   */
 
   return "Hi, there! Thanks how can i help you ?";
+};
+
+/* -- timer function-- 
+this function is written in order to
+a. execute after the tracer starts a Span with the purpose to get the span created 
+b. execute after the tracer ends the created span with the purpose to see the app-developer created traces in X-RAY
+*/
+const forSomeMilliSeconds = (time) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(`time of ${time}ms expired`);
+    }, time);
+  });
 };
 
 const hello = async (event, context) => {
@@ -31,7 +47,7 @@ const hello = async (event, context) => {
 
   const niceResponseSpan = tracer.startSpan("generating nice response");
 
-  niceResponse = openTelemetryAPI.context.with(
+  niceResponse = await openTelemetryAPI.context.with(
     openTelemetryAPI.trace.setSpan(
       openTelemetryAPI.context.active(),
       niceResponseSpan
@@ -41,6 +57,9 @@ const hello = async (event, context) => {
 
   niceResponseSpan.setStatus(openTelemetryAPI.SpanStatusCode.OK);
   niceResponseSpan.end();
+
+  const waitEndSpanResult = await forSomeMilliSeconds(3000);
+  console.log(`after end span, ${waitEndSpanResult}`);
 
   return {
     statusCode: 200,
