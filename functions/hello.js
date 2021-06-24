@@ -6,7 +6,7 @@ let niceResponse;
 
 const generate_a_nice_response = async () => {
   // wait here before getting the span
-  await forSomeMilliSeconds(2000);
+  // await forSomeMilliSeconds(2000);
 
   console.log(
     "nice response Span? ",
@@ -24,6 +24,7 @@ const generate_a_nice_response = async () => {
 this function is written in order to
 a. execute after the tracer starts a Span with the purpose to get the span created 
 b. execute after the tracer ends the created span with the purpose to see the app-developer created traces in X-RAY
+c. execute at the beginning of Lambda invocation, before gettting an instance of a Tracer
 */
 const forSomeMilliSeconds = (time) => {
   return new Promise((resolve, reject) => {
@@ -34,6 +35,10 @@ const forSomeMilliSeconds = (time) => {
 };
 
 const hello = async (event, context) => {
+  const waitOnLambdaInvocation = await forSomeMilliSeconds(2000);
+
+  console.log(`on Lambda Invocation, ${waitOnLambdaInvocation}`);
+
   const tracer = openTelemetryAPI.trace.getTracer("helloTracer", "1.0");
 
   console.log("tracer", tracer);
